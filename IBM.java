@@ -193,7 +193,7 @@ public class IBM
     }
   }
 
-  /**
+  /** TODO
    * Updates the classifier.
    *
    * @param instance the instance to be put into the classifier
@@ -211,7 +211,7 @@ public class IBM
     updateMinMax(instance);
   }
 
-  /**
+  /** TODO
    * Classifies the given test instance.
    *
    * @param instance the instance to be classified
