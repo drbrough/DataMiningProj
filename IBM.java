@@ -17,6 +17,7 @@
 /*
  *    IBM.java
  *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Further Edited Utas 2012
  *
  */
 
