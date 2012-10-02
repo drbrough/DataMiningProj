@@ -177,7 +177,8 @@ public class IBM
    * @param instances set of instances serving as training data
    * @throws Exception if the classifier has not been generated successfully
    */
-  public void buildClassifier(Instances instances) throws Exception {
+  public void buildClassifier(Instances instances) throws Exception
+  {
 
     // can classifier handle the data?
     getCapabilities().testWithFail(instances);
@@ -190,11 +191,13 @@ public class IBM
 
     m_MinArray = new double [m_Train.numAttributes()];
     m_MaxArray = new double [m_Train.numAttributes()];
-    for (int i = 0; i < m_Train.numAttributes(); i++) {
+    for (int i = 0; i < m_Train.numAttributes(); i++)
+    {
       m_MinArray[i] = m_MaxArray[i] = Double.NaN;
     }
     Enumeration enu = m_Train.enumerateInstances();
-    while (enu.hasMoreElements()) {
+    while (enu.hasMoreElements())
+    {
       updateMinMax((Instance) enu.nextElement());
     }
   }
@@ -205,12 +208,15 @@ public class IBM
    * @param instance the instance to be put into the classifier
    * @throws Exception if the instance could not be included successfully
    */
-  public void updateClassifier(Instance instance) throws Exception {
+  public void updateClassifier(Instance instance) throws Exception
+  {
 
-    if (m_Train.equalHeaders(instance.dataset()) == false) {
+    if (m_Train.equalHeaders(instance.dataset()) == false)
+    {
       throw new Exception("Incompatible instance types");
     }
-    if (instance.classIsMissing()) {
+    if (instance.classIsMissing())
+    {
       return;
     }
     m_Train.add(instance);
@@ -224,20 +230,27 @@ public class IBM
    * @return the predicted class for the instance
    * @throws Exception if the instance can't be classified
    */
-  public double classifyInstance(Instance instance) throws Exception {
+  public double classifyInstance(Instance instance) throws Exception
+  {
 
-    if (m_Train.numInstances() == 0) {
+    if (m_Train.numInstances() == 0)
+    {
       throw new Exception("No training instances!");
     }
 
     double distance, minDistance = Double.MAX_VALUE, classValue = 0;
     updateMinMax(instance);
     Enumeration enu = m_Train.enumerateInstances();
-    while (enu.hasMoreElements()) {
+    while (enu.hasMoreElements())
+    {
       Instance trainInstance = (Instance) enu.nextElement();
-      if (!trainInstance.classIsMissing()) {
+      
+      if (!trainInstance.classIsMissing())
+      {
 	distance = distance(instance, trainInstance);
-	if (distance < minDistance) {
+	
+	if (distance < minDistance)
+	{
 	  minDistance = distance;
 	  classValue = trainInstance.classValue();
 	}
@@ -252,7 +265,8 @@ public class IBM
    *
    * @return a description of this classifier as a string.
    */
-  public String toString() {
+  public String toString()
+  {
 
     return ("IBM classifier");
   }
@@ -260,42 +274,61 @@ public class IBM
   /**
    * Calculates the distance between two instances
    *
+   * TODO update this to account for the reliability value of the training instances
+   * 
    * @param first the first instance
    * @param second the second instance
    * @return the distance between the two given instances
    */
-  private double distance(Instance first, Instance second) {
+  private double distance(Instance first, Instance second)
+  {
 
     double diff, distance = 0;
 
-    for(int i = 0; i < m_Train.numAttributes(); i++) {
-      if (i == m_Train.classIndex()) {
+    for(int i = 0; i < m_Train.numAttributes(); i++)
+    {
+      if (i == m_Train.classIndex())
+      {
 	continue;
       }
-      if (m_Train.attribute(i).isNominal()) {
+      if (m_Train.attribute(i).isNominal()) 
+      {
 
 	// If attribute is nominal
 	if (first.isMissing(i) || second.isMissing(i) ||
-	    ((int)first.value(i) != (int)second.value(i))) {
+	    ((int)first.value(i) != (int)second.value(i)))
+	{
 	  distance += 1;
 	}
-      } else {
+      }
+      else 
+      {
 
 	// If attribute is numeric
-	if (first.isMissing(i) || second.isMissing(i)){
-	  if (first.isMissing(i) && second.isMissing(i)) {
+	if (first.isMissing(i) || second.isMissing(i))
+	{
+	  if (first.isMissing(i) && second.isMissing(i))
+	  {
 	    diff = 1;
-	  } else {
-	    if (second.isMissing(i)) {
+	  }
+	  else
+	  {
+	    if (second.isMissing(i))
+	    {
 	      diff = norm(first.value(i), i);
-	    } else {
+	    }
+	    else
+	    {
 	      diff = norm(second.value(i), i);
 	    }
-	    if (diff < 0.5) {
+	    if (diff < 0.5)
+	    {
 	      diff = 1.0 - diff;
 	    }
 	  }
-	} else {
+	}
+	else
+	{
 	  diff = norm(first.value(i), i) - norm(second.value(i), i);
 	}
 	distance += diff * diff;
@@ -312,12 +345,16 @@ public class IBM
    * @param i the attribute's index
    * @return the normalized value
    */
-  private double norm(double x,int i) {
+  private double norm(double x,int i)
+  {
 
     if (Double.isNaN(m_MinArray[i])
-	|| Utils.eq(m_MaxArray[i], m_MinArray[i])) {
+	|| Utils.eq(m_MaxArray[i], m_MinArray[i]))
+    {
       return 0;
-    } else {
+    }
+    else 
+    {
       return (x - m_MinArray[i]) / (m_MaxArray[i] - m_MinArray[i]);
     }
   }
@@ -328,18 +365,28 @@ public class IBM
    *
    * @param instance the new instance
    */
-  private void updateMinMax(Instance instance) {
+  private void updateMinMax(Instance instance)
+  {
 
-    for (int j = 0;j < m_Train.numAttributes(); j++) {
-      if ((m_Train.attribute(j).isNumeric()) && (!instance.isMissing(j))) {
-	if (Double.isNaN(m_MinArray[j])) {
+    for (int j = 0;j < m_Train.numAttributes(); j++)
+    {
+      if ((m_Train.attribute(j).isNumeric()) && (!instance.isMissing(j)))
+      {
+	if (Double.isNaN(m_MinArray[j]))
+	{
 	  m_MinArray[j] = instance.value(j);
 	  m_MaxArray[j] = instance.value(j);
-	} else {
-	  if (instance.value(j) < m_MinArray[j]) {
+	}
+	else 
+	{
+	  if (instance.value(j) < m_MinArray[j])
+	  {
 	    m_MinArray[j] = instance.value(j);
-	  } else {
-	    if (instance.value(j) > m_MaxArray[j]) {
+	  }
+	  else
+	  {
+	    if (instance.value(j) > m_MaxArray[j])
+	    {
 	      m_MaxArray[j] = instance.value(j);
 	    }
 	  }
@@ -353,7 +400,8 @@ public class IBM
    *
    * @return		the revision
    */
-  public String getRevision() {
+  public String getRevision()
+  {
     return RevisionUtils.extract("$Revision: 5525 $");
   }
 
@@ -363,7 +411,8 @@ public class IBM
    * @param argv should contain command line arguments for evaluation
    * (see Evaluation).
    */
-  public static void main(String [] argv) {
+  public static void main(String [] argv)
+  {
     runClassifier(new IBM(), argv);
   }
 }
