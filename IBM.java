@@ -374,25 +374,25 @@ public class IBM
     {
       if ((m_Train.attribute(j).isNumeric()) && (!instance.isMissing(j)))
       {
-	if (Double.isNaN(m_MinArray[j]))
-	{
-	  m_MinArray[j] = instance.value(j);
-	  m_MaxArray[j] = instance.value(j);
-	}
-	else 
-	{
-	  if (instance.value(j) < m_MinArray[j])
-	  {
-	    m_MinArray[j] = instance.value(j);
-	  }
-	  else
-	  {
-	    if (instance.value(j) > m_MaxArray[j])
-	    {
-	      m_MaxArray[j] = instance.value(j);
-	    }
-	  }
-	}
+		if (Double.isNaN(m_MinArray[j]))
+		{
+		  m_MinArray[j] = instance.value(j);
+		  m_MaxArray[j] = instance.value(j);
+		}
+		else 
+		{
+		  if (instance.value(j) < m_MinArray[j])
+		  {
+			m_MinArray[j] = instance.value(j);
+		  }
+		  else
+		  {
+			if (instance.value(j) > m_MaxArray[j])
+			{
+			  m_MaxArray[j] = instance.value(j);
+			}
+		  }
+		}
       }
     }
   }
