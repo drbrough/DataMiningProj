@@ -295,45 +295,45 @@ public class IBM
       }
       if (m_Train.attribute(i).isNominal()) 
       {
-
-	// If attribute is nominal
-	if (first.isMissing(i) || second.isMissing(i) ||
-	    ((int)first.value(i) != (int)second.value(i)))
-	{
-	  distance += 1;
-	}
+		// If attribute is nominal
+		if (first.isMissing(i) || second.isMissing(i) ||
+			((int)first.value(i) != (int)second.value(i)))
+		{
+		  distance += 1;
+		}
       }
       else 
       {
 
-	// If attribute is numeric
-	if (first.isMissing(i) || second.isMissing(i))
-	{
-	  if (first.isMissing(i) && second.isMissing(i))
-	  {
-	    diff = 1;
-	  }
-	  else
-	  {
-	    if (second.isMissing(i))
-	    {
-	      diff = norm(first.value(i), i);
-	    }
-	    else
-	    {
-	      diff = norm(second.value(i), i);
-	    }
-	    if (diff < 0.5)
-	    {
-	      diff = 1.0 - diff;
-	    }
-	  }
-	}
-	else
-	{
-	  diff = norm(first.value(i), i) - norm(second.value(i), i);
-	}
-	distance += diff * diff;
+		// If attribute is numeric
+		if (first.isMissing(i) || second.isMissing(i))
+		{
+		  if (first.isMissing(i) && second.isMissing(i))
+		  {
+			diff = 1;
+		  }
+		  else
+		  {
+			if (second.isMissing(i))
+			{
+			  diff = norm(first.value(i), i);
+			}
+			else
+			{
+			  diff = norm(second.value(i), i);
+			}
+			if (diff < 0.5)
+			{
+			  diff = 1.0 - diff;
+			}
+		  }
+		}
+		else
+		{
+		  diff = norm(first.value(i), i) - norm(second.value(i), i);
+		}
+		
+		distance += diff * diff;
       }
     }
 
