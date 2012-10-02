@@ -22,6 +22,7 @@
  /*
  *	Further modified by Astrid Goss, David Brough and James Scheibner
  *	As a part of the KXT311 Assignment 2 at UTas
+ *	2012
  */
 
 package weka.classifiers.lazy;
