@@ -204,6 +204,7 @@ public class IBM
     }
   }
 
+  // Can't touch this due to spec restrictions
   /**
    * Updates the classifier.
    *
@@ -212,7 +213,6 @@ public class IBM
    */
   public void updateClassifier(Instance instance) throws Exception
   {
-	// TODO alter to account for the differing headers between the instances we have and the new instances
     if (m_Train.equalHeaders(instance.dataset()) == false)
     {
       throw new Exception("Incompatible instance types");
