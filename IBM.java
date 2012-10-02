@@ -19,10 +19,15 @@
  *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
+
  /*
- *	Further modified by Astrid Goss, David Brough and James Scheibner
- *	As a part of the KXT311 Assignment 2 at UTas
- *	2012
+ *	This document has been modified by;
+ *
+ *		Astrid Goss,
+ *		David Brough, and
+ *		James Scheibner.
+ *
+ *	As a part of the KXT311 Assignment 2 at the University of Tasmania 2012.
  */
 
 package weka.classifiers.lazy;
@@ -51,7 +56,7 @@ import java.util.Enumeration;
  * D. Aha, D. Kibler (1991). Instance-based learning algorithms. Machine Learning. 6:37-66.
  * <p/>
  <!-- globalinfo-end -->
- * 
+ *
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
@@ -69,11 +74,11 @@ import java.util.Enumeration;
  *
  <!-- options-start -->
  * Valid options are: <p/>
- * 
+ *
  * <pre> -D
  *  If set, classifier is run in debug mode and
  *  may output additional info to the console</pre>
- * 
+ *
  <!-- options-end -->
  *
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
@@ -81,13 +86,14 @@ import java.util.Enumeration;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision: 5525 $
  */
-public class IBM 
-  extends Classifier 
+
+public class IBM
+  extends Classifier
   implements UpdateableClassifier, TechnicalInformationHandler {
 
   /** for serialization */
   static final long serialVersionUID = -6152184127304895851L;
-  
+
   /** The training instances used for classification. */
   private Instances m_Train;
 
@@ -104,7 +110,7 @@ public class IBM
    */
   public String globalInfo() {
 
-    return "Nearest-neighbour classifier. Uses normalized Euclidean distance to " 
+    return "Nearest-neighbour classifier. Uses normalized Euclidean distance to "
       + "find the training instance closest to the given test instance, and predicts "
       + "the same class as this training instance. If multiple instances have "
       + "the same (smallest) distance to the test instance, the first one found is "
@@ -114,15 +120,15 @@ public class IBM
   }
 
   /**
-   * Returns an instance of a TechnicalInformation object, containing 
+   * Returns an instance of a TechnicalInformation object, containing
    * detailed information about the technical background of this class,
    * e.g., paper reference or book this class is based on.
-   * 
+   *
    * @return the technical information about this class
    */
   public TechnicalInformation getTechnicalInformation() {
     TechnicalInformation 	result;
-    
+
     result = new TechnicalInformation(Type.ARTICLE);
     result.setValue(Field.AUTHOR, "D. Aha and D. Kibler");
     result.setValue(Field.YEAR, "1991");
@@ -130,7 +136,7 @@ public class IBM
     result.setValue(Field.JOURNAL, "Machine Learning");
     result.setValue(Field.VOLUME, "6");
     result.setValue(Field.PAGES, "37-66");
-    
+
     return result;
   }
 
@@ -155,25 +161,25 @@ public class IBM
 
     // instances
     result.setMinimumNumberInstances(0);
-    
+
     return result;
   }
 
   /**
    * Generates the classifier.
    *
-   * @param instances set of instances serving as training data 
+   * @param instances set of instances serving as training data
    * @throws Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
-    
+
     // can classifier handle the data?
     getCapabilities().testWithFail(instances);
 
     // remove instances with missing class
     instances = new Instances(instances);
     instances.deleteWithMissingClass();
-    
+
     m_Train = new Instances(instances, 0, instances.numInstances());
 
     m_MinArray = new double [m_Train.numAttributes()];
@@ -194,7 +200,7 @@ public class IBM
    * @throws Exception if the instance could not be included successfully
    */
   public void updateClassifier(Instance instance) throws Exception {
-  
+
     if (m_Train.equalHeaders(instance.dataset()) == false) {
       throw new Exception("Incompatible instance types");
     }
@@ -209,11 +215,11 @@ public class IBM
    * Classifies the given test instance.
    *
    * @param instance the instance to be classified
-   * @return the predicted class for the instance 
+   * @return the predicted class for the instance
    * @throws Exception if the instance can't be classified
    */
   public double classifyInstance(Instance instance) throws Exception {
-    
+
     if (m_Train.numInstances() == 0) {
       throw new Exception("No training instances!");
     }
@@ -251,12 +257,12 @@ public class IBM
    * @param first the first instance
    * @param second the second instance
    * @return the distance between the two given instances
-   */          
+   */
   private double distance(Instance first, Instance second) {
-    
+
     double diff, distance = 0;
 
-    for(int i = 0; i < m_Train.numAttributes(); i++) { 
+    for(int i = 0; i < m_Train.numAttributes(); i++) {
       if (i == m_Train.classIndex()) {
 	continue;
       }
@@ -268,7 +274,7 @@ public class IBM
 	  distance += 1;
 	}
       } else {
-	
+
 	// If attribute is numeric
 	if (first.isMissing(i) || second.isMissing(i)){
 	  if (first.isMissing(i) && second.isMissing(i)) {
@@ -289,10 +295,10 @@ public class IBM
 	distance += diff * diff;
       }
     }
-    
+
     return distance;
   }
-    
+
   /**
    * Normalizes a given value of a numeric attribute.
    *
@@ -317,7 +323,7 @@ public class IBM
    * @param instance the new instance
    */
   private void updateMinMax(Instance instance) {
-    
+
     for (int j = 0;j < m_Train.numAttributes(); j++) {
       if ((m_Train.attribute(j).isNumeric()) && (!instance.isMissing(j))) {
 	if (Double.isNaN(m_MinArray[j])) {
@@ -335,10 +341,10 @@ public class IBM
       }
     }
   }
-  
+
   /**
    * Returns the revision string.
-   * 
+   *
    * @return		the revision
    */
   public String getRevision() {
