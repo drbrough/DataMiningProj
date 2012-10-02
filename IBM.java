@@ -20,16 +20,6 @@
  *
  */
 
- /*
- *	This document has been modified by;
- *
- *		Astrid Goss,
- *		David Brough, and
- *		James Scheibner.
- *
- *	As a part of the KXT311 Assignment 2 at the University of Tasmania 2012.
- */
-
 package weka.classifiers.lazy;
 
 import weka.classifiers.Classifier;
@@ -86,10 +76,21 @@ import java.util.Enumeration;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision: 5525 $
  */
+ /*
+ *	This document has been further modified by;
+ *
+ *		Astrid Goss,
+ *		David Brough, and
+ *		James Scheibner.
+ *
+ *	As a part of the KXT311 Assignment 2 at the University of Tasmania 2012.
+ */
+
 
 public class IBM
   extends Classifier
-  implements UpdateableClassifier, TechnicalInformationHandler {
+  implements UpdateableClassifier, TechnicalInformationHandler
+{
 
   /** for serialization */
   static final long serialVersionUID = -6152184127304895851L;
@@ -108,7 +109,8 @@ public class IBM
    * @return a description suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String globalInfo() {
+  public String globalInfo()
+  {
 
     return "Nearest-neighbour classifier. Uses normalized Euclidean distance to "
       + "find the training instance closest to the given test instance, and predicts "
@@ -120,13 +122,16 @@ public class IBM
   }
 
   /**
+   * TODO add additional artical refrences here
+   * 
    * Returns an instance of a TechnicalInformation object, containing
    * detailed information about the technical background of this class,
    * e.g., paper reference or book this class is based on.
    *
    * @return the technical information about this class
    */
-  public TechnicalInformation getTechnicalInformation() {
+  public TechnicalInformation getTechnicalInformation()
+  {
     TechnicalInformation 	result;
 
     result = new TechnicalInformation(Type.ARTICLE);
@@ -145,7 +150,8 @@ public class IBM
    *
    * @return      the capabilities of this classifier
    */
-  public Capabilities getCapabilities() {
+  public Capabilities getCapabilities()
+  {
     Capabilities result = super.getCapabilities();
     result.disableAll();
 
