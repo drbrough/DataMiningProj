@@ -17,6 +17,7 @@
 /*
  *    IBM.java
  *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Further Edited Utas 2012
  *
  */
 
@@ -39,24 +40,24 @@ import java.util.Enumeration;
 
 /**
  <!-- globalinfo-start -->
- * Nearest-neighbour classifier. Uses normalized Euclidean distance to find the training instance closest to the given test instance, and predicts the same class as this training instance. If multiple instances have the same (smallest) distance to the test instance, the first one found is used.<br/>
+ * Modified Value Difference Metric (MVDM). Calculates distance tables that allow it to produce real-valued distances between instances, and attaches weights to the instances to further modify the structure of feature space. <br/>
  * <br/>
  * For more information, see <br/>
  * <br/>
- * D. Aha, D. Kibler (1991). Instance-based learning algorithms. Machine Learning. 6:37-66.
+ * S. Cost, S. Salzberg (1993). A Weighted Nearest Neighbor Algorithm for Learning with Symbolic Features. Machine Learning. 10:57-78.
  * <p/>
  <!-- globalinfo-end -->
- *
+ * 
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;article{Aha1991,
- *    author = {D. Aha and D. Kibler},
+ * &#64;article{1993,
+ *    author = {S. Cost and S. Salzberg},
  *    journal = {Machine Learning},
- *    pages = {37-66},
- *    title = {Instance-based learning algorithms},
- *    volume = {6},
- *    year = {1991}
+ *    pages = {57-78},
+ *    title = {A Weighted Nearest Neighbor Algorithm for Learning with Symbolic Features},
+ *    volume = {10},
+ *    year = {1993}
  * }
  * </pre>
  * <p/>
@@ -64,13 +65,12 @@ import java.util.Enumeration;
  *
  <!-- options-start -->
  * Valid options are: <p/>
- *
+ * 
  * <pre> -D
  *  If set, classifier is run in debug mode and
  *  may output additional info to the console</pre>
- *
+ * 
  <!-- options-end -->
- *
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
@@ -109,18 +109,18 @@ public class IBM
    * @return a description suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String globalInfo()
-  {
-
-    return "Nearest-neighbour classifier. Uses normalized weighted Euclidean distance to "
-      + "find the training instance closest to the given test instance, and predicts "
-      + "the same class as this training instance. If multiple instances have "
-      + "the same (smallest) distance to the test instance, the first one found is "
-      + "used.\n\n"
-      + "For more information, see \n\n"
-      + getTechnicalInformation().toString();
+  public String globalInfo() {
+    
+  System.out.println("Display globalInfo now");
+      
+  return "Modified Value Difference Metric (MVDM). Calculates distance tables " 
+    + "that allow it to produce real-valued distances between instances, "
+    + "and attaches weights to the instances to further modify the structure "
+    + "of feature space.\n\n"
+    + "For more information, see \n\n"      
+    + getTechnicalInformation().toString();
   }
-
+  
   /**
    * TODO add additional artical refrences here
    * 
@@ -135,12 +135,12 @@ public class IBM
     TechnicalInformation 	result;
 
     result = new TechnicalInformation(Type.ARTICLE);
-    result.setValue(Field.AUTHOR, "D. Aha and D. Kibler");
-    result.setValue(Field.YEAR, "1991");
-    result.setValue(Field.TITLE, "Instance-based learning algorithms");
+    result.setValue(Field.AUTHOR, "S. Cost and S.Salzberg");
+    result.setValue(Field.YEAR, "1993");
+    result.setValue(Field.TITLE, "A Weighted Nearest Neighbour Algorithm with Learning for Symbolic Featurs");
     result.setValue(Field.JOURNAL, "Machine Learning");
-    result.setValue(Field.VOLUME, "6");
-    result.setValue(Field.PAGES, "37-66");
+    result.setValue(Field.VOLUME, "10");
+    result.setValue(Field.PAGES, "57-78");
 
     return result;
   }
