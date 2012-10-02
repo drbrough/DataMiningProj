@@ -15,7 +15,7 @@
  */
 
 /*
- *    IB1.java
+ *    IBM.java
  *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
@@ -80,7 +80,7 @@ import java.util.Enumeration;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision: 5525 $
  */
-public class IB1 
+public class IBM 
   extends Classifier 
   implements UpdateableClassifier, TechnicalInformationHandler {
 
@@ -241,7 +241,7 @@ public class IB1
    */
   public String toString() {
 
-    return ("IB1 classifier");
+    return ("IBM classifier");
   }
 
   /**
@@ -351,6 +351,6 @@ public class IB1
    * (see Evaluation).
    */
   public static void main(String [] argv) {
-    runClassifier(new IB1(), argv);
+    runClassifier(new IBM(), argv);
   }
 }
