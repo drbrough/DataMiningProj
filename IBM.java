@@ -249,13 +249,13 @@ public class IBM
       
       if (!trainInstance.classIsMissing())
       {
-	distance = distance(instance, trainInstance);
-	
-	if (distance < minDistance)
-	{
-	  minDistance = distance;
-	  classValue = trainInstance.classValue();
-	}
+		distance = distance(instance, trainInstance);
+		
+		if (distance < minDistance)
+		{
+		  minDistance = distance;
+		  classValue = trainInstance.classValue();
+		}
       }
     }
 
@@ -291,7 +291,7 @@ public class IBM
     {
       if (i == m_Train.classIndex())
       {
-	continue;
+		continue;
       }
       if (m_Train.attribute(i).isNominal()) 
       {
