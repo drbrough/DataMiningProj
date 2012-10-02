@@ -112,7 +112,7 @@ public class IBM
   public String globalInfo()
   {
 
-    return "Nearest-neighbour classifier. Uses normalized Euclidean distance to "
+    return "Nearest-neighbour classifier. Uses normalized weighted Euclidean distance to "
       + "find the training instance closest to the given test instance, and predicts "
       + "the same class as this training instance. If multiple instances have "
       + "the same (smallest) distance to the test instance, the first one found is "
@@ -179,22 +179,24 @@ public class IBM
    */
   public void buildClassifier(Instances instances) throws Exception
   {
-
     // can classifier handle the data?
     getCapabilities().testWithFail(instances);
 
     // remove instances with missing class
     instances = new Instances(instances);
+	// TODO alter this to be inline with assignment spec
     instances.deleteWithMissingClass();
 
-    m_Train = new Instances(instances, 0, instances.numInstances());
+	// TODO alter this so that the m_Train has enough room to fit the weighting requirements
+    m_Train = new Instances(instances, 0, instances.numInstances());//+3?
 
-    m_MinArray = new double [m_Train.numAttributes()];
-    m_MaxArray = new double [m_Train.numAttributes()];
+    m_MinArray = new double [m_Train.numAttributes()];//+3?
+    m_MaxArray = new double [m_Train.numAttributes()];//+3?
     for (int i = 0; i < m_Train.numAttributes(); i++)
     {
       m_MinArray[i] = m_MaxArray[i] = Double.NaN;
     }
+	
     Enumeration enu = m_Train.enumerateInstances();
     while (enu.hasMoreElements())
     {
@@ -202,7 +204,7 @@ public class IBM
     }
   }
 
-  /** TODO
+  /**
    * Updates the classifier.
    *
    * @param instance the instance to be put into the classifier
@@ -210,7 +212,7 @@ public class IBM
    */
   public void updateClassifier(Instance instance) throws Exception
   {
-
+	// TODO alter to account for the differing headers between the instances we have and the new instances
     if (m_Train.equalHeaders(instance.dataset()) == false)
     {
       throw new Exception("Incompatible instance types");
@@ -232,7 +234,7 @@ public class IBM
    */
   public double classifyInstance(Instance instance) throws Exception
   {
-
+	
     if (m_Train.numInstances() == 0)
     {
       throw new Exception("No training instances!");
