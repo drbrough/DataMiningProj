@@ -91,35 +91,34 @@ public class IBM
   extends Classifier
   implements UpdateableClassifier, TechnicalInformationHandler
 {
+	/** for serialization */
+	static final long serialVersionUID = -6152184127304895851L;
 
-  /** for serialization */
-  static final long serialVersionUID = -6152184127304895851L;
+	/** The training instances used for classification. */
+	private Instances m_Train;
 
-  /** The training instances used for classification. */
-  private Instances m_Train;
+	/** The minimum values for numeric attributes. */
+	private double [] m_MinArray;
 
-  /** The minimum values for numeric attributes. */
-  private double [] m_MinArray;
+	/** The maximum values for numeric attributes. */
+	private double [] m_MaxArray;
 
-  /** The maximum values for numeric attributes. */
-  private double [] m_MaxArray;
-
-  /**
-   * Returns a string describing classifier
-   * @return a description suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String globalInfo() {
-    
-  System.out.println("Display globalInfo now");
-      
-  return "Modified Value Difference Metric (MVDM). Calculates distance tables " 
-    + "that allow it to produce real-valued distances between instances, "
-    + "and attaches weights to the instances to further modify the structure "
-    + "of feature space.\n\n"
-    + "For more information, see \n\n"      
-    + getTechnicalInformation().toString();
-  }
+	/**
+	* Returns a string describing classifier
+	* @return a description suitable for
+	* displaying in the explorer/experimenter gui
+	*/
+	public String globalInfo()
+	{
+		System.out.println("Display globalInfo now");
+		  
+		return "Modified Value Difference Metric (MVDM). Calculates distance tables " 
+			+ "that allow it to produce real-valued distances between instances, "
+			+ "and attaches weights to the instances to further modify the structure "
+			+ "of feature space.\n\n"
+			+ "For more information, see \n\n"      
+			+ getTechnicalInformation().toString();
+	}
   
   /**
    * TODO add additional artical refrences here
@@ -145,85 +144,88 @@ public class IBM
     return result;
   }
 
-  /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities()
-  {
-    Capabilities result = super.getCapabilities();
-    result.disableAll();
+	/**
+	* Returns default capabilities of the classifier.
+	*
+	* @return      the capabilities of this classifier
+	*/
+	public Capabilities getCapabilities()
+	{
+		Capabilities result = super.getCapabilities();
+		result.disableAll();
 
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
+		// attributes
+		result.enable(Capability.NOMINAL_ATTRIBUTES);
+		result.enable(Capability.NUMERIC_ATTRIBUTES);
+		result.enable(Capability.DATE_ATTRIBUTES);
+		result.enable(Capability.MISSING_VALUES);
 
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
+		// class
+		result.enable(Capability.NOMINAL_CLASS);
+		result.enable(Capability.MISSING_CLASS_VALUES);
 
-    // instances
-    result.setMinimumNumberInstances(0);
+		// instances
+		result.setMinimumNumberInstances(0);
 
-    return result;
-  }
+		return result;
+	}
 
-  /**
-   * Generates the classifier.
-   *
-   * @param instances set of instances serving as training data
-   * @throws Exception if the classifier has not been generated successfully
-   */
-  public void buildClassifier(Instances instances) throws Exception
-  {
-    // can classifier handle the data?
-    getCapabilities().testWithFail(instances);
+	/**
+	* Generates the classifier.
+	*
+	* @param instances set of instances serving as training data
+	* @throws Exception if the classifier has not been generated successfully
+	*/
+	public void buildClassifier(Instances instances) throws Exception
+	{
+		// can classifier handle the data?
+		getCapabilities().testWithFail(instances);
 
-    // remove instances with missing class
-    instances = new Instances(instances);
-	// TODO alter this to be inline with assignment spec
-    instances.deleteWithMissingClass();
+		// remove instances with missing class
+		instances = new Instances(instances);
+		// TODO alter this to be inline with assignment spec
+		instances.deleteWithMissingClass();
 
-	// TODO alter this so that the m_Train has enough room to fit the weighting requirements
-    m_Train = new Instances(instances, 0, instances.numInstances());//+3?
+		m_Train = new Instances(instances, 0, instances.numInstances());
+		// Insert additional attributes to fit the weighting requirements
+		m_Train.insertAttributeAt(new Attribute("numUsesIBM", m_Train.numAttributes()));
+		m_Train.insertAttributeAt(new Attribute("numCoreIBM", m_Train.numAttributes()));
+		m_Train.insertAttributeAt(new Attribute("weightIBM", m_Train.numAttributes()));
 
-    m_MinArray = new double [m_Train.numAttributes()];//+3?
-    m_MaxArray = new double [m_Train.numAttributes()];//+3?
-    for (int i = 0; i < m_Train.numAttributes(); i++)
-    {
-      m_MinArray[i] = m_MaxArray[i] = Double.NaN;
-    }
-	
-    Enumeration enu = m_Train.enumerateInstances();
-    while (enu.hasMoreElements())
-    {
-      updateMinMax((Instance) enu.nextElement());
-    }
-  }
+		m_MinArray = new double [m_Train.numAttributes()];//+3?
+		m_MaxArray = new double [m_Train.numAttributes()];//+3?
+		for (int i = 0; i < m_Train.numAttributes(); i++)
+		{
+			m_MinArray[i] = m_MaxArray[i] = Double.NaN;
+		}
 
-  // Can't touch this due to spec restrictions
-  /**
-   * Updates the classifier.
-   *
-   * @param instance the instance to be put into the classifier
-   * @throws Exception if the instance could not be included successfully
-   */
-  public void updateClassifier(Instance instance) throws Exception
-  {
-    if (m_Train.equalHeaders(instance.dataset()) == false)
-    {
-      throw new Exception("Incompatible instance types");
-    }
-    if (instance.classIsMissing())
-    {
-      return;
-    }
-    m_Train.add(instance);
-    updateMinMax(instance);
-  }
+		Enumeration enu = m_Train.enumerateInstances();
+		while (enu.hasMoreElements())
+		{
+			updateMinMax((Instance) enu.nextElement());
+		}
+	}
+
+	// Can't touch this due to spec restrictions
+	/**
+	* Updates the classifier.
+	*
+	* @param instance the instance to be put into the classifier
+	* @throws Exception if the instance could not be included successfully
+	*/
+	public void updateClassifier(Instance instance) throws Exception
+	{
+		if (m_Train.equalHeaders(instance.dataset()) == false)
+		{
+			throw new Exception("Incompatible instance types");
+		}
+		if (instance.classIsMissing())
+		{
+			return;
+		}
+		m_Train.add(instance);
+		updateMinMax(instance);
+	}
 
   /** TODO
    * Classifies the given test instance.
