@@ -121,7 +121,7 @@ public class IBM
 	}
   
   /**
-   * TODO add additional artical refrences here
+   * TODO add additional article refrences here
    * 
    * Returns an instance of a TechnicalInformation object, containing
    * detailed information about the technical background of this class,
@@ -183,14 +183,9 @@ public class IBM
 
 		// remove instances with missing class
 		instances = new Instances(instances);
-		// TODO alter this to be inline with assignment spec
 		instances.deleteWithMissingClass();
 
 		m_Train = new Instances(instances, 0, instances.numInstances());
-		// Insert additional attributes to fit the weighting requirements
-		m_Train.insertAttributeAt(new Attribute("numUsesIBM", m_Train.numAttributes()));
-		m_Train.insertAttributeAt(new Attribute("numCoreIBM", m_Train.numAttributes()));
-		m_Train.insertAttributeAt(new Attribute("weightIBM", m_Train.numAttributes()));
 
 		m_MinArray = new double [m_Train.numAttributes()];//+3?
 		m_MaxArray = new double [m_Train.numAttributes()];//+3?
@@ -206,7 +201,6 @@ public class IBM
 		}
 	}
 
-	// Can't touch this due to spec restrictions
 	/**
 	* Updates the classifier.
 	*
@@ -227,120 +221,139 @@ public class IBM
 		updateMinMax(instance);
 	}
 
-  /** TODO
-   * Classifies the given test instance.
-   *
-   * @param instance the instance to be classified
-   * @return the predicted class for the instance
-   * @throws Exception if the instance can't be classified
-   */
-  public double classifyInstance(Instance instance) throws Exception
-  {
-	
-    if (m_Train.numInstances() == 0)
-    {
-      throw new Exception("No training instances!");
-    }
-
-    double distance, minDistance = Double.MAX_VALUE, classValue = 0;
-    updateMinMax(instance);
-    Enumeration enu = m_Train.enumerateInstances();
-    while (enu.hasMoreElements())
-    {
-      Instance trainInstance = (Instance) enu.nextElement();
-      
-      if (!trainInstance.classIsMissing())
-      {
-		distance = distance(instance, trainInstance);
-		
-		if (distance < minDistance)
+	/**
+	* Classifies the given test instance.
+	*
+	* @param instance the instance to be classified
+	* @return the predicted class for the instance
+	* @throws Exception if the instance can't be classified
+	*/
+	public double classifyInstance(Instance instance) throws Exception
+	{
+		if (m_Train.numInstances() == 0)
 		{
-		  minDistance = distance;
-		  classValue = trainInstance.classValue();
+			throw new Exception("No training instances!");
 		}
-      }
-    }
 
-    return classValue;
-  }
-
-  /**
-   * Returns a description of this classifier.
-   *
-   * @return a description of this classifier as a string.
-   */
-  public String toString()
-  {
-
-    return ("IBM classifier");
-  }
-
-  /**
-   * Calculates the distance between two instances
-   *
-   * TODO update this to account for the reliability value of the training instances
-   * 
-   * @param first the first instance
-   * @param second the second instance
-   * @return the distance between the two given instances
-   */
-  private double distance(Instance first, Instance second)
-  {
-
-    double diff, distance = 0;
-
-    for(int i = 0; i < m_Train.numAttributes(); i++)
-    {
-      if (i == m_Train.classIndex())
-      {
-		continue;
-      }
-      if (m_Train.attribute(i).isNominal()) 
-      {
-		// If attribute is nominal
-		if (first.isMissing(i) || second.isMissing(i) ||
-			((int)first.value(i) != (int)second.value(i)))
+		double distance, minDistance = Double.MAX_VALUE, classValue = 0;
+		updateMinMax(instance);
+		Enumeration enu = m_Train.enumerateInstances();
+		while (enu.hasMoreElements())
 		{
-		  distance += 1;
-		}
-      }
-      else 
-      {
+			Instance trainInstance = (Instance) enu.nextElement();
 
-		// If attribute is numeric
-		if (first.isMissing(i) || second.isMissing(i))
-		{
-		  if (first.isMissing(i) && second.isMissing(i))
-		  {
-			diff = 1;
-		  }
-		  else
-		  {
-			if (second.isMissing(i))
+			if (!trainInstance.classIsMissing())
 			{
-			  diff = norm(first.value(i), i);
-			}
-			else
-			{
-			  diff = norm(second.value(i), i);
-			}
-			if (diff < 0.5)
-			{
-			  diff = 1.0 - diff;
-			}
-		  }
-		}
-		else
-		{
-		  diff = norm(first.value(i), i) - norm(second.value(i), i);
-		}
-		
-		distance += diff * diff;
-      }
-    }
+				distance = distance(instance, trainInstance);
 
-    return distance;
-  }
+				if (distance < minDistance)
+				{
+					minDistance = distance;
+					classValue = trainInstance.classValue();
+				}
+			}
+		}
+
+		return classValue;
+	}
+
+	/**
+	* Returns a description of this classifier.
+	*
+	* @return a description of this classifier as a string.
+	*/
+	public String toString()
+	{
+		return ("IBM classifier");
+	}
+
+	/**
+	* Calculates the distance between two instances
+	*
+	* @param first the first instance
+	* @param second the second instance
+	* @return the distance between the two given instances
+	*/
+	private double distance(Instance first, Instance second)
+	{
+		double diff, distance = 0;
+
+		for(int i = 0; i < m_Train.numAttributes(); i++)
+		{
+			if (i == m_Train.classIndex())
+			{
+			continue;
+			}
+			if (m_Train.attribute(i).isNominal()) 
+			{
+				// TODO Initalise to one?
+				int firstCount = 0;
+				int secondCount = 0;
+				int firstClassCount = 0;
+				int secondClassCount = 0;
+				double attribDist = 0;
+				
+				// TODO adjust this to accomodate the new metric
+				// If attribute is nominal
+				for(Instance sam : m_Train)
+				{
+					// Count the number of times first.value(i) has occured
+					if (((int)first.value(i) != (int)sam.value(i)))
+					{
+						++firstCount;
+					}
+					// Count the number of times second.value(i) has occured
+					if (((int)first.value(i) != (int)sam.value(i)))
+					{
+						++secondCount;
+					}
+				}
+				//TODO
+				for(int classCount = 0; classCount < m_Train.numClasses())
+				{
+					// Count the number of times first.value(i) has occured for this class
+					// Count the number of times second.value(i) has occured for this class
+				}
+				// divide 
+				
+				distance += attribDist;
+			}
+			else 
+			{
+				// If attribute is numeric
+				if (first.isMissing(i) || second.isMissing(i))
+				{
+					if (first.isMissing(i) && second.isMissing(i))
+					{
+						diff = 1;
+					}
+					else
+					{
+						if (second.isMissing(i))
+						{
+							diff = norm(first.value(i), i);
+						}
+						else
+						{
+							diff = norm(second.value(i), i);
+						}
+						if (diff < 0.5)
+						{
+							diff = 1.0 - diff;
+						}
+					}
+				}
+				else
+				{
+					diff = norm(first.value(i), i) - norm(second.value(i), i);
+				}
+
+				distance += diff * diff;
+			}
+		}
+
+		return distance;
+	}
 
   /**
    * Normalizes a given value of a numeric attribute.
