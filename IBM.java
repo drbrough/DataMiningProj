@@ -286,15 +286,15 @@ public class IBM
 			}
 			if (m_Train.attribute(i).isNominal()) 
 			{
-				// TODO Initalise to one?
 				int firstCount = 0;
 				int secondCount = 0;
 				int firstClassCount = 0;
 				int secondClassCount = 0;
 				double attribDist = 0;
 				
-				// TODO adjust this to accomodate the new metric
 				// If attribute is nominal
+				// Count the number of occurrences of this value for the
+				// attribute
 				for(Instance sam : m_Train)
 				{
 					// Count the number of times first.value(i) has occured
@@ -308,13 +308,49 @@ public class IBM
 						++secondCount;
 					}
 				}
-				//TODO
-				for(int classCount = 0; classCount < m_Train.numClasses())
+				
+				// Check to see if both values occurred at least once
+				// correct to avoid the divide by zero problem otherwise
+				// as per assignment spec
+				if(firstCount == 0)
 				{
-					// Count the number of times first.value(i) has occured for this class
-					// Count the number of times second.value(i) has occured for this class
+					firstCount = 1;
 				}
-				// divide 
+				if(secondCount == 0)
+				{
+					secondCount = 1;
+				}
+				
+				// Count the number of occurrences of this value for the
+				// attribute for each class
+				for(int classCount = 0;
+					classCount < m_Train.numClasses(); ++classCount)
+				{
+					// Reset the class counts for this class
+					firstClassCount = 0;
+					secondClassCount = 0;
+					
+					for(Instance sam : m_Train)
+					{
+						// Count the number of times first.value(i) has
+						// occured for this class
+						if (((int)first.value(i) == (int)sam.value(i)))
+						{
+							++firstClassCount;
+						}
+						
+						// Count the number of times second.value(i) has
+						// occured for this class
+						if (((int)first.value(i) == (int)sam.value(i)))
+						{
+							++secondClassCount;
+						}
+					}
+					
+					// Contribute this class vlaues to the running total
+					attribDist += abs(firstClassCount / firstCount -
+						secondClassCount / secondCount);
+				}
 				
 				distance += attribDist;
 			}
