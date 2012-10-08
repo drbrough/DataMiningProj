@@ -35,6 +35,8 @@ import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
+import java.lang.Math;
+import java.util.LinkedList;
 
 import java.util.Enumeration;
 
@@ -91,38 +93,37 @@ public class IBM
   extends Classifier
   implements UpdateableClassifier, TechnicalInformationHandler
 {
+	/** for serialization */
+	static final long serialVersionUID = -6152184127304895851L;
 
-  /** for serialization */
-  static final long serialVersionUID = -6152184127304895851L;
+	/** The training instances used for classification. */
+	private Instances m_Train;
 
-  /** The training instances used for classification. */
-  private Instances m_Train;
+	/** The minimum values for numeric attributes. */
+	private double [] m_MinArray;
 
-  /** The minimum values for numeric attributes. */
-  private double [] m_MinArray;
+	/** The maximum values for numeric attributes. */
+	private double [] m_MaxArray;
 
-  /** The maximum values for numeric attributes. */
-  private double [] m_MaxArray;
-
-  /**
-   * Returns a string describing classifier
-   * @return a description suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String globalInfo() {
-    
-  System.out.println("Display globalInfo now");
-      
-  return "Modified Value Difference Metric (MVDM). Calculates distance tables " 
-    + "that allow it to produce real-valued distances between instances, "
-    + "and attaches weights to the instances to further modify the structure "
-    + "of feature space.\n\n"
-    + "For more information, see \n\n"      
-    + getTechnicalInformation().toString();
-  }
+	/**
+	* Returns a string describing classifier
+	* @return a description suitable for
+	* displaying in the explorer/experimenter gui
+	*/
+	public String globalInfo()
+	{
+		System.out.println("Display globalInfo now");
+		  
+		return "Modified Value Difference Metric (MVDM). Calculates distance tables " 
+			+ "that allow it to produce real-valued distances between instances, "
+			+ "and attaches weights to the instances to further modify the structure "
+			+ "of feature space.\n\n"
+			+ "For more information, see \n\n"      
+			+ getTechnicalInformation().toString();
+	}
   
   /**
-   * TODO add additional artical refrences here
+   * TODO add additional article refrences here
    * 
    * Returns an instance of a TechnicalInformation object, containing
    * detailed information about the technical background of this class,
@@ -145,200 +146,277 @@ public class IBM
     return result;
   }
 
-  /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities()
-  {
-    Capabilities result = super.getCapabilities();
-    result.disableAll();
+	/**
+	* Returns default capabilities of the classifier.
+	*
+	* @return      the capabilities of this classifier
+	*/
+	public Capabilities getCapabilities()
+	{
+		Capabilities result = super.getCapabilities();
+		result.disableAll();
 
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
+		// attributes
+		result.enable(Capability.NOMINAL_ATTRIBUTES);
+		result.enable(Capability.NUMERIC_ATTRIBUTES);
+		result.enable(Capability.DATE_ATTRIBUTES);
+		result.enable(Capability.MISSING_VALUES);
 
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
+		// class
+		result.enable(Capability.NOMINAL_CLASS);
+		result.enable(Capability.MISSING_CLASS_VALUES);
 
-    // instances
-    result.setMinimumNumberInstances(0);
+		// instances
+		result.setMinimumNumberInstances(0);
 
-    return result;
-  }
+		return result;
+	}
 
-  /**
-   * Generates the classifier.
-   *
-   * @param instances set of instances serving as training data
-   * @throws Exception if the classifier has not been generated successfully
-   */
-  public void buildClassifier(Instances instances) throws Exception
-  {
-    // can classifier handle the data?
-    getCapabilities().testWithFail(instances);
+	/**
+	* Generates the classifier.
+	*
+	* @param instances set of instances serving as training data
+	* @throws Exception if the classifier has not been generated successfully
+	*/
+	public void buildClassifier(Instances instances) throws Exception
+	{
+		// can classifier handle the data?
+		getCapabilities().testWithFail(instances);
 
-    // remove instances with missing class
-    instances = new Instances(instances);
-	// TODO alter this to be inline with assignment spec
-    instances.deleteWithMissingClass();
+		// remove instances with missing class
+		instances = new Instances(instances);
+		instances.deleteWithMissingClass();
 
-	// TODO alter this so that the m_Train has enough room to fit the weighting requirements
-    m_Train = new Instances(instances, 0, instances.numInstances());//+3?
+		m_Train = new Instances(instances, 0, instances.numInstances());
 
-    m_MinArray = new double [m_Train.numAttributes()];//+3?
-    m_MaxArray = new double [m_Train.numAttributes()];//+3?
-    for (int i = 0; i < m_Train.numAttributes(); i++)
-    {
-      m_MinArray[i] = m_MaxArray[i] = Double.NaN;
-    }
-	
-    Enumeration enu = m_Train.enumerateInstances();
-    while (enu.hasMoreElements())
-    {
-      updateMinMax((Instance) enu.nextElement());
-    }
-  }
+		m_MinArray = new double [m_Train.numAttributes()];//+3?
+		m_MaxArray = new double [m_Train.numAttributes()];//+3?
+		for (int i = 0; i < m_Train.numAttributes(); i++)
+		{
+			m_MinArray[i] = m_MaxArray[i] = Double.NaN;
+		}
 
-  // Can't touch this due to spec restrictions
-  /**
-   * Updates the classifier.
-   *
-   * @param instance the instance to be put into the classifier
-   * @throws Exception if the instance could not be included successfully
-   */
-  public void updateClassifier(Instance instance) throws Exception
-  {
-    if (m_Train.equalHeaders(instance.dataset()) == false)
-    {
-      throw new Exception("Incompatible instance types");
-    }
-    if (instance.classIsMissing())
-    {
-      return;
-    }
-    m_Train.add(instance);
-    updateMinMax(instance);
-  }
+		Enumeration enu = m_Train.enumerateInstances();
+		while (enu.hasMoreElements())
+		{
+			updateMinMax((Instance) enu.nextElement());
+		}
+	}
 
-  /** TODO
-   * Classifies the given test instance.
-   *
-   * @param instance the instance to be classified
-   * @return the predicted class for the instance
-   * @throws Exception if the instance can't be classified
-   */
-  public double classifyInstance(Instance instance) throws Exception
-  {
-	
-    if (m_Train.numInstances() == 0)
-    {
-      throw new Exception("No training instances!");
-    }
+	/**
+	* Updates the classifier.
+	*
+	* @param instance the instance to be put into the classifier
+	* @throws Exception if the instance could not be included successfully
+	*/
+	public void updateClassifier(Instance instance) throws Exception
+	{
+		if (m_Train.equalHeaders(instance.dataset()) == false)
+		{
+			throw new Exception("Incompatible instance types");
+		}
+		if (instance.classIsMissing())
+		{
+			return;
+		}
+		m_Train.add(instance);
+		updateMinMax(instance);
+	}
 
-    double distance, minDistance = Double.MAX_VALUE, classValue = 0;
-    updateMinMax(instance);
-    Enumeration enu = m_Train.enumerateInstances();
-    while (enu.hasMoreElements())
-    {
-      Instance trainInstance = (Instance) enu.nextElement();
-      
-      if (!trainInstance.classIsMissing())
-      {
-		distance = distance(instance, trainInstance);
+	/**
+	* Classifies the given test instance.
+	*
+	* @param instance the instance to be classified
+	* @return the predicted class for the instance
+	* @throws Exception if the instance can't be classified
+	*/
+	public double classifyInstance(Instance instance) throws Exception
+	{
+		if (m_Train.numInstances() == 0)
+		{
+			throw new Exception("No training instances!");
+		}
+
+		double distance, minDistance = Double.MAX_VALUE, classValue = 0;
+		updateMinMax(instance);
+		Enumeration enu = m_Train.enumerateInstances();
+		while (enu.hasMoreElements())
+		{
+			Instance trainInstance = (Instance) enu.nextElement();
+
+			if (!trainInstance.classIsMissing())
+			{
+				distance = distance(instance, trainInstance);
+
+				if (distance < minDistance)
+				{
+					minDistance = distance;
+					classValue = trainInstance.classValue();
+				}
+			}
+		}
+
+		return classValue;
+	}
+
+	/**
+	* Returns a description of this classifier.
+	*
+	* @return a description of this classifier as a string.
+	*/
+	public String toString()
+	{
+		return ("IBM classifier");
+	}
+
+	/**
+	* Calculates the distance between two instances
+	*
+	* @param first the first instance
+	* @param second the second instance
+	* @return the distance between the two given instances
+	*/
+	private double distance(Instance first, Instance second)
+	{
+		double diff, distance = 0;
 		
-		if (distance < minDistance)
-		{
-		  minDistance = distance;
-		  classValue = trainInstance.classValue();
-		}
-      }
-    }
-
-    return classValue;
-  }
-
-  /**
-   * Returns a description of this classifier.
-   *
-   * @return a description of this classifier as a string.
-   */
-  public String toString()
-  {
-
-    return ("IBM classifier");
-  }
-
-  /**
-   * Calculates the distance between two instances
-   *
-   * TODO update this to account for the reliability value of the training instances
-   * 
-   * @param first the first instance
-   * @param second the second instance
-   * @return the distance between the two given instances
-   */
-  private double distance(Instance first, Instance second)
-  {
-
-    double diff, distance = 0;
-
-    for(int i = 0; i < m_Train.numAttributes(); i++)
-    {
-      if (i == m_Train.classIndex())
-      {
-		continue;
-      }
-      if (m_Train.attribute(i).isNominal()) 
-      {
-		// If attribute is nominal
-		if (first.isMissing(i) || second.isMissing(i) ||
-			((int)first.value(i) != (int)second.value(i)))
-		{
-		  distance += 1;
-		}
-      }
-      else 
-      {
-
-		// If attribute is numeric
-		if (first.isMissing(i) || second.isMissing(i))
-		{
-		  if (first.isMissing(i) && second.isMissing(i))
-		  {
-			diff = 1;
-		  }
-		  else
-		  {
-			if (second.isMissing(i))
-			{
-			  diff = norm(first.value(i), i);
-			}
-			else
-			{
-			  diff = norm(second.value(i), i);
-			}
-			if (diff < 0.5)
-			{
-			  diff = 1.0 - diff;
-			}
-		  }
-		}
-		else
-		{
-		  diff = norm(first.value(i), i) - norm(second.value(i), i);
-		}
+		LinkedList<Instance> training_Items = new LinkedList<Instance>();
+		training_Items.add(second);
+		//System.out.println("Training item is " + training_Items.get(0));
 		
-		distance += diff * diff;
-      }
-    }
+		/* LinkedList<Instance> training_Items = new LinkedList<Instance>();
+		for (int j=0; j<m_Train.numAttributes(); j++) {
+			training_Items.add(m_Train.instance(j));
+		} */
+		Enumeration enu = m_Train.enumerateInstances();
+		/* while (enu.hasMoreElements()) {
+			training_Items.add((Instance) enu.nextElement());
+		} */
 
-    return distance;
-  }
+		for(int i = 0; i < m_Train.numAttributes(); i++)
+		{
+			//LinkedList<Instance> training_Items = new LinkedList<Instance>(m_Train.instance(i));
+			//training_Items.add(m_Train.instance(i));
+			if (i == m_Train.classIndex())
+			{
+			continue;
+			}
+			if (m_Train.attribute(i).isNominal()) 
+			{
+				int firstCount = 0;
+				int secondCount = 0;
+				int firstClassCount = 0;
+				int secondClassCount = 0;
+				double attribDist = 0;
+				
+				// If attribute is nominal
+				// Count the number of occurrences of this value for the
+				// attribute
+								
+				//for(Instance sam : m_Train)
+				//for (int j=0; j < m_Train.numAttributes(); j++)
+				for(Instance sam : training_Items)
+				{
+					//Instances instances = m_Train.m_Instances;
+					//Instance sam = instances.get(j);
+					//if (sam.toString().equals(second.toString())) {
+					//if (sam.equalHeaders(second) || sam.equals(second)) {
+						// Count the number of times first.value(i) has occured
+					if (((int)first.value(i) != (int)sam.value(i)))
+					{
+						++firstCount;
+					}
+					// Count the number of times second.value(i) has occured
+					if (((int)second.value(i) != (int)sam.value(i)))
+					{
+						++secondCount;
+					}
+					//}
+				}
+				
+				// Check to see if both values occurred at least once
+				// correct to avoid the divide by zero problem otherwise
+				// as per assignment spec
+				if(firstCount == 0)
+				{
+					firstCount = 1;
+				}
+				if(secondCount == 0)
+				{
+					secondCount = 1;
+				}
+				
+				// Count the number of occurrences of this value for the
+				// attribute for each class
+				for(int classCount = 0; classCount < m_Train.numClasses(); ++classCount)
+				//while(enu.hasMoreElements())
+				{
+					// Reset the class counts for this class
+					//firstClassCount = 0;
+					firstClassCount = 0;
+					secondClassCount = 0;
+					
+					//for(Instance sam : m_Train)
+					for(Instance sam : training_Items)
+					{
+						// Count the number of times first.value(i) has
+						// occured for this class
+						if (((int)first.value(i) == (int)sam.value(i)))
+						{
+							++firstClassCount;
+						}
+						
+						// Count the number of times second.value(i) has
+						// occured for this class
+						if (((int)second.value(i) == (int)sam.value(i)))
+						{
+							++secondClassCount;
+						}
+					}
+					
+					// Contribute this class vlaues to the running total
+					attribDist += Math.abs((firstClassCount / firstCount) -
+						(secondClassCount / secondCount));
+				}
+				
+				distance += attribDist;
+			}
+			else 
+			{
+				// If attribute is numeric
+				if (first.isMissing(i) || second.isMissing(i))
+				{
+					if (first.isMissing(i) && second.isMissing(i))
+					{
+						diff = 1;
+					}
+					else
+					{
+						if (second.isMissing(i))
+						{
+							diff = norm(first.value(i), i);
+						}
+						else
+						{
+							diff = norm(second.value(i), i);
+						}
+						if (diff < 0.5)
+						{
+							diff = 1.0 - diff;
+						}
+					}
+				}
+				else
+				{
+					diff = norm(first.value(i), i) - norm(second.value(i), i);
+				}
+
+				distance += diff * diff;
+			}
+		}
+
+		return distance;
+	}
 
   /**
    * Normalizes a given value of a numeric attribute.
