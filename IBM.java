@@ -298,12 +298,12 @@ public class IBM
 				for(Instance sam : m_Train)
 				{
 					// Count the number of times first.value(i) has occured
-					if (((int)first.value(i) != (int)sam.value(i)))
+					if (((int)first.value(i) == (int)sam.value(i)))
 					{
 						++firstCount;
 					}
 					// Count the number of times second.value(i) has occured
-					if (((int)first.value(i) != (int)sam.value(i)))
+					if (((int)first.value(i) == (int)sam.value(i)))
 					{
 						++secondCount;
 					}
