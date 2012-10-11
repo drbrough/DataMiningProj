@@ -284,7 +284,7 @@ public class IBM
 		int[] classCount2 = new int[m_Train.numClasses()];
 		int classTrack = 0;
 		
-		for(Enumerator classIn = m_Train.classAttribute().enumerateValues(); classIn.hasMoreElements())
+		for(Enumerator classIn = m_Train.classAttribute().enumerateValues(); classIn.hasMoreElements();)
 		{
 			classList[classTrack] = (Attribute)classIn.nextElement());
 			
@@ -308,7 +308,7 @@ public class IBM
 				
 				// Count the number of occurrences of this value for the
 				// attribute
-				for(Enumerator thisIn = m_Train.enumerateInstances(); thisIn.hasMoreElements())
+				for(Enumerator thisIn = m_Train.enumerateInstances(); thisIn.hasMoreElements();)
 				{
 					Instance sam = (Instance)thisIn.nextElement();
 					
