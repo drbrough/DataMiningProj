@@ -25,7 +25,6 @@ package weka.classifiers.lazy;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.UpdateableClassifier;
-import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -36,8 +35,9 @@ import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
-
 import java.lang.Math;
+import java.util.LinkedList;
+
 import java.util.Enumeration;
 
 /**
@@ -138,7 +138,7 @@ public class IBM
     result = new TechnicalInformation(Type.ARTICLE);
     result.setValue(Field.AUTHOR, "S. Cost and S.Salzberg");
     result.setValue(Field.YEAR, "1993");
-    result.setValue(Field.TITLE, "A Weighted Nearest Neighbour Algorithm with Learning for Symbolic Features");
+    result.setValue(Field.TITLE, "A Weighted Nearest Neighbour Algorithm with Learning for Symbolic Featurs");
     result.setValue(Field.JOURNAL, "Machine Learning");
     result.setValue(Field.VOLUME, "10");
     result.setValue(Field.PAGES, "57-78");
@@ -280,72 +280,58 @@ public class IBM
 	{
 		double diff, distance = 0;
 		
-		// Get a listing of the classes and an array for each currentInstanceple instance
-		Attribute [] classList = new Attribute[m_Train.numClasses()];
-		int[] classCount1 = new int[m_Train.numClasses()];
-		int[] classCount2 = new int[m_Train.numClasses()];
-		int classTrack = 0;
-		Enumeration classIn = m_Train.classAttribute().enumerateValues();
+		LinkedList<Instance> training_Items = new LinkedList<Instance>();
+		training_Items.add(second);
+		//System.out.println("Training item is " + training_Items.get(0));
 		
-		//Iterate through all of the classes in m_Train. Add the attribute from each class 
-		//to class list.
-		for(int i = 0; i < m_Train.numClasses(); ++i)
-		{
-			Object o = classIn.nextElement();
-			Attribute att = new Attribute(o.toString());
-			classList[classTrack] = att;
-			++classTrack;
-		}
-		
+		/* LinkedList<Instance> training_Items = new LinkedList<Instance>();
+		for (int j=0; j<m_Train.numAttributes(); j++) {
+			training_Items.add(m_Train.instance(j));
+		} */
+		Enumeration enu = m_Train.enumerateInstances();
+		/* while (enu.hasMoreElements()) {
+			training_Items.add((Instance) enu.nextElement());
+		} */
+
 		for(int i = 0; i < m_Train.numAttributes(); i++)
 		{
+			//LinkedList<Instance> training_Items = new LinkedList<Instance>(m_Train.instance(i));
+			//training_Items.add(m_Train.instance(i));
 			if (i == m_Train.classIndex())
 			{
-				continue;
+			continue;
 			}
 			if (m_Train.attribute(i).isNominal()) 
 			{
-				// If attribute is nominal
 				int firstCount = 0;
 				int secondCount = 0;
 				int firstClassCount = 0;
 				int secondClassCount = 0;
 				double attribDist = 0;
 				
+				// If attribute is nominal
 				// Count the number of occurrences of this value for the
 				// attribute
-				Enumeration thisIn = m_Train.enumerateInstances();
-				for(int j = 0; j < m_Train.numClasses(); ++j)
+								
+				//for(Instance sam : m_Train)
+				//for (int j=0; j < m_Train.numAttributes(); j++)
+				for(Instance sam : training_Items)
 				{
-					// 
-					Instance currentInstance = (Instance)(thisIn.nextElement());
-					
-					// Count the number of times first.value(i) has occured
-					if (((int)first.value(i) == (int)currentInstance.value(i)))
+					//Instances instances = m_Train.m_Instances;
+					//Instance sam = instances.get(j);
+					//if (sam.toString().equals(second.toString())) {
+					//if (sam.equalHeaders(second) || sam.equals(second)) {
+						// Count the number of times first.value(i) has occured
+					if (((int)first.value(i) != (int)sam.value(i)))
 					{
 						++firstCount;
-						
-						for(int index = 0; index < m_Train.numClasses(); ++index)
-						{
-							if(currentInstance.attribute(currentInstance.classIndex()) == classList[index])
-							{
-								++classCount1[index];								
-							}
-						}
 					}
 					// Count the number of times second.value(i) has occured
-					if (((int)first.value(i) == (int)currentInstance.value(i)))
+					if (((int)second.value(i) != (int)sam.value(i)))
 					{
 						++secondCount;
-
-						for(int index = 0; index < m_Train.numClasses(); ++index)
-						{
-							if(currentInstance.attribute(currentInstance.classIndex()) == classList[index])
-							{
-								++classCount2[index];								
-							}
-						}
 					}
+					//}
 				}
 				
 				// Check to see if both values occurred at least once
@@ -360,11 +346,37 @@ public class IBM
 					secondCount = 1;
 				}
 				
-				// Contribute this class values to the running total
-				for(int index = 0; index < m_Train.numClasses(); ++index)
+				// Count the number of occurrences of this value for the
+				// attribute for each class
+				for(int classCount = 0; classCount < m_Train.numClasses(); ++classCount)
+				//while(enu.hasMoreElements())
 				{
-					attribDist += Math.abs(classCount1[index] / firstCount -
-						classCount2[index] / secondCount);
+					// Reset the class counts for this class
+					//firstClassCount = 0;
+					firstClassCount = 0;
+					secondClassCount = 0;
+					
+					//for(Instance sam : m_Train)
+					for(Instance sam : training_Items)
+					{
+						// Count the number of times first.value(i) has
+						// occured for this class
+						if (((int)first.value(i) == (int)sam.value(i)))
+						{
+							++firstClassCount;
+						}
+						
+						// Count the number of times second.value(i) has
+						// occured for this class
+						if (((int)second.value(i) == (int)sam.value(i)))
+						{
+							++secondClassCount;
+						}
+					}
+					
+					// Contribute this class vlaues to the running total
+					attribDist += Math.abs((firstClassCount / firstCount) -
+						(secondClassCount / secondCount));
 				}
 				
 				distance += attribDist;
