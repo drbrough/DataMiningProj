@@ -286,7 +286,7 @@ public class IBM
 		
 		for(Enumerator classIn = m_Train.classAttribute().enumerateValues(); classIn.hasMoreElements())
 		{
-			classList[classTrack] = classIn;
+			classList[classTrack] = (Attribute)classIn.nextElement());
 			
 			++classTrack;
 		}
