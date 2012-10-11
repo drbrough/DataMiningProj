@@ -136,7 +136,7 @@ public class IBM
     result = new TechnicalInformation(Type.ARTICLE);
     result.setValue(Field.AUTHOR, "S. Cost and S.Salzberg");
     result.setValue(Field.YEAR, "1993");
-    result.setValue(Field.TITLE, "A Weighted Nearest Neighbour Algorithm with Learning for Symbolic Featurs");
+    result.setValue(Field.TITLE, "A Weighted Nearest Neighbour Algorithm with Learning for Symbolic Features");
     result.setValue(Field.JOURNAL, "Machine Learning");
     result.setValue(Field.VOLUME, "10");
     result.setValue(Field.PAGES, "57-78");
@@ -277,37 +277,66 @@ public class IBM
 	private double distance(Instance first, Instance second)
 	{
 		double diff, distance = 0;
+		
+		// Get a listing of the classes and an array for each sample instance
+		Attribute [] classList = new Attribute[m_Train.numClasses()];
+		int[] classCount1 = new int[m_Train.numClasses()];
+		int[] classCount2 = new int[m_Train.numClasses()];
+		int classTrack = 0;
+		
+		for(Enumerator classIn = m_Train.classAttribute().enumerateValues())
+		{
+			classList[classTrack] = classIn;
+			
+			++classTrack;
+		}
 
 		for(int i = 0; i < m_Train.numAttributes(); i++)
 		{
 			if (i == m_Train.classIndex())
 			{
-			continue;
+				continue;
 			}
 			if (m_Train.attribute(i).isNominal()) 
 			{
+				// If attribute is nominal
 				int firstCount = 0;
 				int secondCount = 0;
 				int firstClassCount = 0;
 				int secondClassCount = 0;
 				double attribDist = 0;
 				
-				// If attribute is nominal
 				// Count the number of occurrences of this value for the
 				// attribute
-				for(Enumerator thisIn = m_Train. enumerateInstances())
+				for(Enumerator thisIn = m_Train.enumerateInstances())
 				{
-					Instance sam
+					Instance sam = (Instance)thisIn.nextElement();
 					
 					// Count the number of times first.value(i) has occured
 					if (((int)first.value(i) == (int)sam.value(i)))
 					{
 						++firstCount;
+						
+						for(int index = 0; index < m_Train.numClasses(); ++index)
+						{
+							if(sam.attribute(thisIn.classIndex()) == classList[index])
+							{
+								++classCount1[index];								
+							}
+						}
 					}
 					// Count the number of times second.value(i) has occured
 					if (((int)first.value(i) == (int)sam.value(i)))
 					{
 						++secondCount;
+
+						for(int index = 0; index < m_Train.numClasses(); ++index)
+						{
+							if(sam.attribute(thisIn.classIndex()) == classList[index])
+							{
+								++classCount2[index];								
+							}
+						}
 					}
 				}
 				
@@ -323,35 +352,11 @@ public class IBM
 					secondCount = 1;
 				}
 				
-				// Count the number of occurrences of this value for the
-				// attribute for each class
-				for(int classCount = 0;
-					classCount < m_Train.numClasses(); ++classCount)
+				// Contribute this class values to the running total
+				for(int index = 0; index < m_Train.numClasses(); ++index)
 				{
-					// Reset the class counts for this class
-					firstClassCount = 0;
-					secondClassCount = 0;
-					
-					for(Instance sam : m_Train)
-					{
-						// Count the number of times first.value(i) has
-						// occured for this class
-						if (((int)first.value(i) == (int)sam.value(i)))
-						{
-							++firstClassCount;
-						}
-						
-						// Count the number of times second.value(i) has
-						// occured for this class
-						if (((int)first.value(i) == (int)sam.value(i)))
-						{
-							++secondClassCount;
-						}
-					}
-					
-					// Contribute this class vlaues to the running total
-					attribDist += abs(firstClassCount / firstCount -
-						secondClassCount / secondCount);
+					attribDist += abs(classCount1[index] / firstCount -
+						classCount2[index] / secondCount);
 				}
 				
 				distance += attribDist;
