@@ -295,8 +295,10 @@ public class IBM
 				// If attribute is nominal
 				// Count the number of occurrences of this value for the
 				// attribute
-				for(Instance sam : m_Train)
+				for(Enumerator thisIn = m_Train. enumerateInstances())
 				{
+					Instance sam
+					
 					// Count the number of times first.value(i) has occured
 					if (((int)first.value(i) == (int)sam.value(i)))
 					{
