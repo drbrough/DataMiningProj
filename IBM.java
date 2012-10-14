@@ -278,19 +278,23 @@ public class IBM
 	{
 		double diff, distance = 0;
 		
-		// Get a listing of the classes and an array for each sample instance
+		// Get a listing of the classes and an array for each currentInstanceple instance
 		Attribute [] classList = new Attribute[m_Train.numClasses()];
 		int[] classCount1 = new int[m_Train.numClasses()];
 		int[] classCount2 = new int[m_Train.numClasses()];
 		int classTrack = 0;
+		Enumeration classIn = m_Train.classAttribute().enumerateValues();
 		
-		for(Enumerator classIn = m_Train.classAttribute().enumerateValues(); classIn.hasMoreElements();)
+		//Iterate through all of the classes in m_Train. Add the attribute from each class 
+		//to class list.
+		for(int i = 0; i < m_Train.numClasses(); ++i)
 		{
-			classList[classTrack] = (Attribute)classIn.nextElement());
-			
+			Object o = classIn.nextElement();
+			Attribute att = new Attribute(o.toString());
+			classList[classTrack] = att;
 			++classTrack;
 		}
-
+		
 		for(int i = 0; i < m_Train.numAttributes(); i++)
 		{
 			if (i == m_Train.classIndex())
@@ -308,35 +312,26 @@ public class IBM
 				
 				// Count the number of occurrences of this value for the
 				// attribute
-				for(Enumerator thisIn = m_Train.enumerateInstances(); thisIn.hasMoreElements();)
+				Enumeration thisIn = m_Train.enumerateInstances();
+				for(int j = 0; j < m_Train.numClasses(); ++j)
 				{
-					Instance sam = (Instance)thisIn.nextElement();
+					// 
+					Instance currentInstance = (Instance)(thisIn.nextElement());
 					
 					// Count the number of times first.value(i) has occured
-					if (((int)first.value(i) == (int)sam.value(i)))
+					if (((int)first.value(i) == (int)currentInstance.value(i)))
 					{
 						++firstCount;
 						
-						for(int index = 0; index < m_Train.numClasses(); ++index)
-						{
-							if(sam.attribute(thisIn.classIndex()) == classList[index])
-							{
-								++classCount1[index];								
-							}
-						}
+						++classCount1[(int)currentInstance.classValue()];								
 					}
+					
 					// Count the number of times second.value(i) has occured
-					if (((int)first.value(i) == (int)sam.value(i)))
+					if (((int)second.value(i) == (int)currentInstance.value(i)))
 					{
 						++secondCount;
 
-						for(int index = 0; index < m_Train.numClasses(); ++index)
-						{
-							if(sam.attribute(thisIn.classIndex()) == classList[index])
-							{
-								++classCount2[index];								
-							}
-						}
+						++classCount2[(int)currentInstance.classValue()];
 					}
 				}
 				
@@ -355,7 +350,7 @@ public class IBM
 				// Contribute this class values to the running total
 				for(int index = 0; index < m_Train.numClasses(); ++index)
 				{
-					attribDist += abs(classCount1[index] / firstCount -
+					attribDist += Math.abs(classCount1[index] / firstCount -
 						classCount2[index] / secondCount);
 				}
 				
