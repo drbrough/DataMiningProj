@@ -351,8 +351,8 @@ public class IBM
 				// page 62 of Cost & Salzberg's paper.
 				for(int index = 0; index < m_Train.numClasses(); ++index)
 				{
-					attribDist += Math.abs(classCount1[index] / firstCount -
-						classCount2[index] / secondCount);
+					attribDist += Math.abs((double)(classCount1[index]) / (double)firstCount -
+						(double)(classCount2[index]) / (double)secondCount);
 				}
 				
 				distance += attribDist;
