@@ -25,6 +25,7 @@ package weka.classifiers.lazy;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.UpdateableClassifier;
+import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
