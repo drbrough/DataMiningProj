@@ -282,7 +282,6 @@ public class IBM
 		Attribute [] classList = new Attribute[m_Train.numClasses()];
 		int[] classCount1 = new int[m_Train.numClasses()];
 		int[] classCount2 = new int[m_Train.numClasses()];
-		int classTrack = 0;
 		Enumeration classIn = m_Train.classAttribute().enumerateValues();
 		
 		//Iterate through all of the classes in m_Train. Add the attribute from each class 
@@ -291,8 +290,7 @@ public class IBM
 		{
 			Object o = classIn.nextElement();
 			Attribute att = new Attribute(o.toString());
-			classList[classTrack] = att;
-			++classTrack;
+			classList[i] = att;
 		}
 		
 		for(int i = 0; i < m_Train.numAttributes(); i++)
@@ -306,8 +304,6 @@ public class IBM
 				// If attribute is nominal
 				int firstCount = 0;
 				int secondCount = 0;
-				int firstClassCount = 0;
-				int secondClassCount = 0;
 				double attribDist = 0;
 				
 				// Count the number of occurrences of this value for the
@@ -322,7 +318,8 @@ public class IBM
 					if (((int)first.value(i) == (int)currentInstance.value(i)))
 					{
 						++firstCount;
-						
+						//Then increment the classCount1 array depending on the 
+						//value of the class of currentInstance. 
 						++classCount1[(int)currentInstance.classValue()];								
 					}
 					
@@ -330,7 +327,8 @@ public class IBM
 					if (((int)second.value(i) == (int)currentInstance.value(i)))
 					{
 						++secondCount;
-
+						// Then increment the classCount2 array depending on teh
+						// value of the class of currentInstance.
 						++classCount2[(int)currentInstance.classValue()];
 					}
 				}
@@ -348,6 +346,8 @@ public class IBM
 				}
 				
 				// Contribute this class values to the running total
+				// This implements the modification of the Stanfill & Waltz formula on
+				// page 62 of Cost & Salzberg's paper.
 				for(int index = 0; index < m_Train.numClasses(); ++index)
 				{
 					attribDist += Math.abs(classCount1[index] / firstCount -
