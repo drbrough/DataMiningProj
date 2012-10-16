@@ -37,7 +37,6 @@ import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
 
-import java.lang.Math;
 import java.util.Enumeration;
 
 /**
@@ -282,20 +281,10 @@ public class IBM
 		
 		// Get a listing of the classes and an array for each currentInstanceple instance
 		Attribute [] classList = new Attribute[m_Train.numClasses()];
-		int[] classCount1 = new int[m_Train.numClasses()];
-		int[] classCount2 = new int[m_Train.numClasses()];
-		int classTrack = 0;
-		Enumeration classIn = m_Train.classAttribute().enumerateValues();
-		
-		//Iterate through all of the classes in m_Train. Add the attribute from each class 
-		//to class list.
-		for(int i = 0; i < m_Train.numClasses(); ++i)
-		{
-			Object o = classIn.nextElement();
-			Attribute att = new Attribute(o.toString());
-			classList[classTrack] = att;
-			++classTrack;
-		}
+		// Declare a double array for storing the number of appearances for classes belonging to class 1.
+		double[] classCount1 = new double[m_Train.numClasses()];
+		// Declare a double array for storing the number of appearances for classes beloning to class 2. 
+		double[] classCount2 = new double[m_Train.numClasses()];
 		
 		for(int i = 0; i < m_Train.numAttributes(); i++)
 		{
@@ -306,51 +295,47 @@ public class IBM
 			if (m_Train.attribute(i).isNominal()) 
 			{
 				// If attribute is nominal
-				int firstCount = 0;
-				int secondCount = 0;
-				int firstClassCount = 0;
-				int secondClassCount = 0;
+				double firstCount = 0;
+				double secondCount = 0;
 				double attribDist = 0;
 				
-				// Count the number of occurrences of this value for the
-				// attribute
-				Enumeration thisIn = m_Train.enumerateInstances();
+				/** Count the number of occurrences of this value for the
+				  * attribute
+				  */
 				for(int j = 0; j < m_Train.numClasses(); ++j)
 				{
-					// 
-					Instance currentInstance = (Instance)(thisIn.nextElement());
+					/** Set the current training instance to be the analysed to be the 
+					 * instance value at j.
+					 */
+					Instance currentInstance = m_Train.instance(j);
 					
-					// Count the number of times first.value(i) has occured
-					if (((int)first.value(i) == (int)currentInstance.value(i)))
+					/** Check to see whether the first instance carries the same attribute value as the
+					 *  attribute value for the current training instance.
+					 */
+					if ((first.value(i) == currentInstance.value(i)))
 					{
+						// Count the number of times first.value(i) has occured by incrementing firstCount.
 						++firstCount;
-						
-						for(int index = 0; index < m_Train.numClasses(); ++index)
-						{
-							if(currentInstance.attribute(currentInstance.classIndex()) == classList[index])
-							{
-								++classCount1[index];								
-							}
-						}
+						// Then increment the classCount1 array to represent secondInstance being classified into classCount1.
+						++classCount1[(int)currentInstance.classValue()];								
 					}
-					// Count the number of times second.value(i) has occured
-					if (((int)first.value(i) == (int)currentInstance.value(i)))
+					
+					/** Check to see whether the first instance carries the same value as the
+					 *  current training instance.
+					 */
+					if ((second.value(i) == currentInstance.value(i)))
 					{
+						// Count the number of times second.value(i) has occured by incrementing firstCount.
 						++secondCount;
-
-						for(int index = 0; index < m_Train.numClasses(); ++index)
-						{
-							if(currentInstance.attribute(currentInstance.classIndex()) == classList[index])
-							{
-								++classCount2[index];								
-							}
-						}
+						// Then increment the classCount2 array to represent secondInstance being classified into classCount2.
+						++classCount2[(int)currentInstance.classValue()];
 					}
 				}
 				
-				// Check to see if both values occurred at least once
-				// correct to avoid the divide by zero problem otherwise
-				// as per assignment spec
+				/** Check to see if both values occurred at least once
+				 * correct to avoid the divide by zero problem otherwise
+				 * as per assignment spec
+				 */
 				if(firstCount == 0)
 				{
 					firstCount = 1;
@@ -360,13 +345,20 @@ public class IBM
 					secondCount = 1;
 				}
 				
-				// Contribute this class values to the running total
+				/** Contribute this class values to the running total
+				 * This implements the modification of the Stanfill & Waltz formula on
+				 * page 62 of Cost & Salzberg's paper.
+				 */
 				for(int index = 0; index < m_Train.numClasses(); ++index)
 				{
-					attribDist += Math.abs(classCount1[index] / firstCount -
-						classCount2[index] / secondCount);
+					/** 
+					 * Add the absolute value of the quotient of classCount1 and firstCount less the quotient of the classCount2 and secondCount
+					 * in order to determine the attribute Dist value.
+					 */
+					attribDist += Math.abs((classCount1[index]) / firstCount - (classCount2[index]) / secondCount);
 				}
 				
+				// Calculate the Manhatten difference by adding the attribDist to distance.
 				distance += attribDist;
 			}
 			else 
